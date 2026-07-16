@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
+
 import config
 
 db = SQLAlchemy()
@@ -17,8 +18,10 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
 
-    #블루프린트 등록
-    from .views import main_views
+    # 블루프린트 등록
+    from .views import main_views, question_views, answer_views
     app.register_blueprint(main_views.bp)
+    app.register_blueprint(question_views.bp)
+    app.register_blueprint(answer_views.bp)
     
     return app
