@@ -7,12 +7,18 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
+                {% if g.user %}
                 <li class="nav-item">
-                    <a class="nav-link" href="#">회원가입</a>
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">{{ g.user.username }}(로그아웃)</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.signup') }}">회원가입</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">로그인</a>
+                    <a class="nav-link" href="{{ url_for('auth.login') }}">로그인</a>
                 </li>
+                {% endif %}
             </ul>
         </div>
     </div>

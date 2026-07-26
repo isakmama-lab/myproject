@@ -17,6 +17,7 @@
         <tr class="table-dark">
             <th scope="col">번호</th>
             <th scope="col">제목</th>
+            <th scope="col">글쓴이</th>
             <th scope="col">작성일자</th>
         </tr>
     </thead>
@@ -32,6 +33,9 @@
                 {% if question.answer_set|length > 0 %}
                 <span class="text-danger small ms-2">{{ question.answer_set|length }}</span>
                 {% endif %}
+            </td>
+            <td>
+                {{ question.user.username }}
             </td>
             <td>{{ question.create_date | datetime }}</td>
         </tr>
