@@ -1,12 +1,14 @@
 from datetime import datetime
-from flask import Blueprint, url_for, request, redirect, render_template, g
+from flask import Blueprint, url_for, request, redirect, render_template, g, flash
 from pybo import db
 from pybo.models import Question, Answer
 from pybo.forms import AnswerForm   # 폼 모듈 임포트
+from pybo.views.auth_views import login_required
 
 bp = Blueprint('answer', __name__, url_prefix='/answer')
 
 @bp.route('/create/<int:question_id>/', methods=('POST',))
+@login_required
 def create(question_id):
     # 질문번호를 Question테이블에서 조회
     # 있으면 아래코드를 처리 없으면 404에러
@@ -19,3 +21,33 @@ def create(question_id):
         db.session.commit()
         return redirect(url_for('question.detail', question_id=question_id))
     return render_template('question/question_detail.html', question=question, form=form)
+
+@bp.route('/modify/<int:answer_id>/', methods=('GET', 'POST'))
+@login_required
+def modify(answer_id):
+    answer = Answer.query.get_or_404(answer_id)
+    if g.user != answer.user:
+        flash('수정권한이 없습니다')
+        return redirect(url_for('question.detail', question_id=answer.question.id))
+
+    if request.method == 'POST':
+        form = AnswerForm()
+        if form.validate_on_submit():
+            form.populate_obj(answer)
+            db.session.commit()
+            return redirect(url_for('question.detail', question_id=answer.question.id))
+    else:
+        form = AnswerForm(obj=answer)
+    return render_template('answer/answer_form.html', answer=answer, form=form)
+
+@bp.route('/delete/<int:answer_id>/')
+@login_required
+def delete(answer_id):
+    answer = Answer.query.get_or_404(answer_id)
+    question_id = answer.question.id
+    if g.user != answer.user:
+        flash('삭제권한이 없습니다')
+    else:
+        db.session.delete(answer)
+        db.session.commit()
+    return redirect(url_for('question.detail', question_id=question_id))

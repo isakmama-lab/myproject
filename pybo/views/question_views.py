@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, url_for, redirect, request, g
+from flask import Blueprint, render_template, url_for, redirect, request, g, flash
 from pybo.models import Question
 from datetime import datetime
 from pybo import db
 from pybo.forms import QuestionForm, AnswerForm
+from pybo.views.auth_views import login_required   # 데코레이터 임포트
 
 
 bp = Blueprint('question', __name__, url_prefix='/question')
@@ -23,6 +24,7 @@ def detail(question_id):
 
 # 질문 등록 라우트 함수 추가
 @bp.route('/create/', methods=('GET', 'POST'))
+@login_required
 def create():
     form = QuestionForm()
     if request.method == 'POST' and form.validate_on_submit():
@@ -31,3 +33,33 @@ def create():
         db.session.commit()
         return redirect(url_for('question._list'))
     return render_template('question/question_form.html', form=form)
+
+@bp.route('/modify/<int:question_id>/', methods=('GET', 'POST'))
+@login_required
+def modify(question_id):
+    question = Question.query.get_or_404(question_id)
+    if g.user != question.user:
+        flash('수정권한이 없습니다')
+        return redirect(url_for('question.detail', question_id=question_id))
+
+    if request.method == 'POST':
+        form = QuestionForm()
+        if form.validate_on_submit():
+            form.populate_obj(question) # 폼 데이터를 question 객체에 동적 복사
+            db.session.commit()
+            return redirect(url_for('question.detail', question_id=question_id))
+    else:
+        # GET 요청일 경우 기존 데이터를 폼에 채워서 렌더링
+        form = QuestionForm(obj=question)
+    return render_template('question/question_form.html', form=form)
+
+@bp.route('/delete/<int:question_id>/')
+@login_required
+def delete(question_id):
+    question = Question.query.get_or_404(question_id)
+    if g.user != question.user:
+        flash('삭제권한이 없습니다')
+        return redirect(url_for('question.detail', question_id=question_id))
+    db.session.delete(question)
+    db.session.commit()
+    return redirect(url_for('question._list'))

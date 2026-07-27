@@ -30,8 +30,18 @@
                     <div>{{ question.create_date | datetime}}</div>
                 </div>
             </div>
+            {% if g.user == question.user %}
+            <div class="my-3">
+                <a href="{{ url_for('question.modify', question_id=question.id) }}" class="btn btn-sm btn-outline-secondary">수정</a>
+
+                <a href="javascript:void(0)" 
+                   data-uri="{{ url_for('question.delete', question_id=question.id) }}"
+                   class="delete btn btn-sm btn-outline-secondary">삭제</a>
+            </div>
+            {% endif %}
         </div>
     </div>
+    
     <h5 class="border-bottom my-3 py-2">{{ question.answer_set|length }}개의 답변이 있습니다.</h5>
     {% for answer in question.answer_set %}
     <div class="card my-3">
@@ -46,6 +56,17 @@
                     <div>{{ answer.create_date | datetime}}</div>
                 </div>
             </div>
+
+            {% if g.user == answer.user %}
+            <div class="my-3">
+                <a href="{{ url_for('answer.modify', answer_id=answer.id) }}" 
+                   class="btn btn-sm btn-outline-secondary">수정</a>
+                <a href="javascript:void(0)" 
+                   data-uri="{{ url_for('answer.delete', answer_id=answer.id) }}"
+                   class="delete btn btn-sm btn-outline-secondary">삭제</a>
+            </div>
+            {% endif %}
+
         </div>
     </div>
     {% endfor %}
@@ -65,9 +86,12 @@
         </div>
         {% endif %}
         <div class="mb-3">
-            <textarea name="content" id="content" rows="10" class="form-control"></textarea>
+            <textarea name="content" id="content" rows="10" class="form-control"
+            {% if not g.user %}disabled{% endif %}></textarea>
         </div>
         <input type="submit" value="답변등록" class="btn btn-primary">
     </form>
 </div>
+{% endblock %}
+{% block script %}
 {% endblock %}

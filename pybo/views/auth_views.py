@@ -3,9 +3,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from pybo import db
 from pybo.forms import UserCreateForm, UserLoginForm
 from pybo.models import User
+import functools
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
+# 회원 등록
 @bp.route('/signup/', methods=('GET', 'POST'))
 def signup():
     form = UserCreateForm()
@@ -53,4 +55,13 @@ def load_logged_in_user():
 @bp.route('/logout/')
 def logout():
     session.clear()
-    return redirect(url_for('main.index'))        
+    return redirect(url_for('main.index'))   
+
+def login_required(view):
+    # Flask의 라우팅, 디버깅, 문서화 등에 필요한 원래 함수의 메타데이터(이름, 설명, 모듈 정보 등)를 보존
+    @functools.wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+        return view(*args, **kwargs)
+    return wrapped_view
