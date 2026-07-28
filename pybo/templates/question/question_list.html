@@ -16,6 +16,7 @@
     <thead>
         <tr class="table-dark">
             <th scope="col">번호</th>
+            <th scope="col">추천</th> <!-- 추가 -->
             <th scope="col">제목</th>
             <th scope="col">글쓴이</th>
             <th scope="col">작성일자</th>
@@ -27,6 +28,8 @@
         <tr>
             <!-- <td>{{ loop.index }}</td> -->
             <td>{{ question_list.total - ((question_list.page - 1) * question_list.per_page) - loop.index0 }}</td>
+            <!--  -->
+            <td>{{ question.voter|length }}</td> <!-- 추천 수 -->
             <td>
                 <a href="{{ url_for('question.detail', question_id=question.id) }}">{{ question.subject }}</a>
                 {# 답변의 개수를 표시 #}
