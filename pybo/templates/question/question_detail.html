@@ -98,15 +98,19 @@
                 </div>
             </div>
 
-            {% if g.user == answer.user %}
             <div class="my-3">
+                <a href="javascript:void(0)" data-uri="{{ url_for('answer.vote', answer_id=answer.id) }}"
+                    class="recommend btn btn-sm btn-outline-secondary"> 추천
+                    <span class="badge rounded-pill bg-success">{{ answer.voter|length }}</span>
+                </a>
+                {% if g.user == answer.user %}
                 <a href="{{ url_for('answer.modify', answer_id=answer.id) }}" 
                    class="btn btn-sm btn-outline-secondary">수정</a>
                 <a href="javascript:void(0)" 
                    data-uri="{{ url_for('answer.delete', answer_id=answer.id) }}"
                    class="delete btn btn-sm btn-outline-secondary">삭제</a>
+                {% endif %}
             </div>
-            {% endif %}
 
         </div>
     <!-- </div> -->
