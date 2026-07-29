@@ -19,7 +19,11 @@ def create(question_id):
         answer = Answer(content=content, create_date=datetime.now(), user=g.user)
         question.answer_set.append(answer)
         db.session.commit()
-        return redirect(url_for('question.detail', question_id=question_id))
+        # return redirect(url_for('question.detail', question_id=question_id))
+        # 답변 등록 시 앵커 기능 추가
+        return redirect('{}#answer_{}'.format(
+            url_for('question.detail', question_id=question_id), answer.id
+        ))
     return render_template('question/question_detail.html', question=question, form=form)
 
 @bp.route('/modify/<int:answer_id>/', methods=('GET', 'POST'))
@@ -35,7 +39,11 @@ def modify(answer_id):
         if form.validate_on_submit():
             form.populate_obj(answer)
             db.session.commit()
-            return redirect(url_for('question.detail', question_id=answer.question.id))
+            # return redirect(url_for('question.detail', question_id=answer.question.id))
+            # 답변 수정 시 앵커 기능 추가
+            return redirect('{}#answer_{}'.format(
+                url_for('question.detail', question_id=answer.question.id), answer.id
+            ))
     else:
         form = AnswerForm(obj=answer)
     return render_template('answer/answer_form.html', answer=answer, form=form)
