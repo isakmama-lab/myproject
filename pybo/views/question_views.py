@@ -1,10 +1,13 @@
-from flask import Blueprint, render_template, url_for, redirect, request, g, flash
+from flask import Blueprint, render_template, url_for, redirect, request, g, flash, current_app
 from pybo.models import Question, Answer, User, question_voter
 from datetime import datetime
 from pybo import db
 from pybo.forms import QuestionForm, AnswerForm
 from pybo.views.auth_views import login_required   # 데코레이터 임포트
 from sqlalchemy import func, distinct
+import os
+import uuid
+from werkzeug.utils import secure_filename
 
 
 bp = Blueprint('question', __name__, url_prefix='/question')
@@ -79,7 +82,44 @@ def detail(question_id):
 def create():
     form = QuestionForm()
     if request.method == 'POST' and form.validate_on_submit():
-        question = Question(subject=form.subject.data, content=form.content.data, create_date=datetime.now(), user=g.user)
+
+        print("=" * 50)
+        print("request.files :", request.files)
+        print("image.data    :", form.image.data)
+        print("filename      :", form.image.data.filename if form.image.data else None)
+        print("root_path     :", current_app.root_path)
+        print("=" * 50)
+
+        # 폼에서 전송된 이미지 파일
+        image_file = form.image.data
+        image_path = None
+
+        if image_file:
+            # 저장 경로 : 오늘 날짜로 폴더 생성
+            today = datetime.now().strftime('%Y%m%d')
+            upload_folder = os.path.join(current_app.root_path, 'static/photo', today)
+            os.makedirs(upload_folder, exist_ok=True)
+
+            # 파일 저장
+            # secure_filename() : 사용자가 업로드한 파일명을 운영체제에서 안전하게 사용할 수 있는 형태로 변환하여, 경로 조작(Path Traversal) 등의 보안 위험을 줄여 주는 함수
+            filename = secure_filename(image_file.filename)
+            # 출력해서 만들어진 파일이름을 확인합니다.
+            print("filename ====> " , filename)
+            
+            ext = os.path.splitext(filename)[1]
+            filename = f"{uuid.uuid4()}{ext}"
+            
+            file_path = os.path.join(upload_folder, filename)
+            image_file.save(file_path)
+
+            # DB에 저장할 경로 (static 기준 상대경로)
+            image_path = f'photo/{today}/{filename}'
+
+        question = Question(subject=form.subject.data, 
+                            content=form.content.data, 
+                            create_date=datetime.now(), 
+                            user=g.user, 
+                            image_path=image_path )
         db.session.add(question)
         db.session.commit()
         return redirect(url_for('question._list'))
