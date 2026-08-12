@@ -26,7 +26,7 @@ dist/
 .env
 .flaskenv
 instance/
-config.py
+# config.py
 
 # ==========================================
 # 4. 로컬 데이터베이스 (SQLite 등)
