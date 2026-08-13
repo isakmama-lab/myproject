@@ -19,6 +19,12 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
 
+    # --------------------------------------------------
+    # [추가] 애플리케이션 컨텍스트 안에서 실제 테이블 생성 실행
+    # --------------------------------------------------
+    with app.app_context():
+        db.create_all()
+
     # 1. 마크다운 변환 함수를 선언합니다.
     def format_markdown(text):
         if not text:
