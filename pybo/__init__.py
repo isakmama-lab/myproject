@@ -15,13 +15,13 @@ def create_app():
     app.config.from_object(config)
 
     # ORM 초기화
-    from . import models
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # --------------------------------------------------
-    # [추가] 애플리케이션 컨텍스트 안에서 실제 테이블 생성 실행
-    # --------------------------------------------------
+    # 1. db.create_all() 실행 전에 반드시 models를 먼저 불러옵니다!
+    from . import models  
+
+    # 2. 애플리케이션 컨텍스트에서 실제 테이블 생성
     with app.app_context():
         db.create_all()
 
